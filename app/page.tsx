@@ -11,7 +11,7 @@ export default function Home() {
           color="#e8c070"
           speed={0.4}
           direction="forward"
-          scale={1.1}
+          scale={1}
           opacity={0.7}
           mouseInteractive={true}
         />
@@ -83,18 +83,17 @@ export default function Home() {
         <p className="max-w-md text-sm md:text-base leading-7 text-[#b8a888] tracking-wide font-light mt-2">
           향기는 기억이 된다.
           <br />
-          니치 향수의 섬세한 이야기를 담아냅니다.
+          여운 향수의 섬세한 이야기를 담아냅니다.
         </p>
 
         {/* CTA 버튼 */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
           <a
-            href="https://yeoun-five.vercel.app/"
-            target="_blank"
+            href="#"
             rel="noopener noreferrer"
             className="px-8 py-3 text-xs tracking-[0.3em] uppercase bg-[#e8c070] text-[#1c1710] font-medium hover:bg-[#f5d480] transition-colors duration-300"
           >
-            About Yeoun
+            REVIEWS
           </a>
           <Link
             href="/review"

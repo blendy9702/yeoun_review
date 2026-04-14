@@ -1,168 +1,230 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import { Renderer, Program, Mesh, Triangle } from "ogl";
 
 interface PlasmaProps {
   color?: string;
   speed?: number;
-  direction?: "forward" | "backward";
+  direction?: "forward" | "reverse" | "pingpong";
   scale?: number;
   opacity?: number;
   mouseInteractive?: boolean;
 }
 
-function hexToRgb(hex: string): [number, number, number] {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return r
-    ? [parseInt(r[1], 16) / 255, parseInt(r[2], 16) / 255, parseInt(r[3], 16) / 255]
-    : [0.788, 0.663, 0.431];
-}
+const hexToRgb = (hex: string): [number, number, number] => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return [1, 0.5, 0.2];
+  return [
+    parseInt(result[1], 16) / 255,
+    parseInt(result[2], 16) / 255,
+    parseInt(result[3], 16) / 255,
+  ];
+};
 
-const VERT = `
-  attribute vec2 a_pos;
-  void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
+const vertex = `#version 300 es
+precision highp float;
+in vec2 position;
+in vec2 uv;
+out vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = vec4(position, 0.0, 1.0);
+}
 `;
 
-const FRAG = `
-  precision mediump float;
-  uniform float u_time;
-  uniform vec2  u_res;
-  uniform vec3  u_color;
-  uniform float u_scale;
-  uniform vec2  u_mouse;
-  uniform float u_interactive;
+const fragment = `#version 300 es
+precision highp float;
+uniform vec2 iResolution;
+uniform float iTime;
+uniform vec3 uCustomColor;
+uniform float uUseCustomColor;
+uniform float uSpeed;
+uniform float uDirection;
+uniform float uScale;
+uniform float uOpacity;
+uniform vec2 uMouse;
+uniform float uMouseInteractive;
+out vec4 fragColor;
 
-  void main() {
-    vec2 uv = (gl_FragCoord.xy / u_res) * 2.0 - 1.0;
-    uv.x *= u_res.x / u_res.y;
-    uv *= u_scale;
+void mainImage(out vec4 o, vec2 C) {
+  vec2 center = iResolution.xy * 0.5;
+  C = (C - center) / uScale + center;
 
-    float t = u_time;
+  vec2 mouseOffset = (uMouse - center) * 0.0002;
+  C += mouseOffset * length(C - center) * step(0.5, uMouseInteractive);
 
-    float w1 = sin(uv.x * 2.5 + t * 0.8 + sin(uv.y * 1.8 + t * 0.4) * 2.0);
-    float w2 = sin(uv.y * 2.0 - t * 0.6 + sin(uv.x * 2.0 - t * 0.3) * 1.8);
-    float w3 = sin((uv.x * 1.5 + uv.y * 1.2) + t * 0.5);
-    float r  = length(uv * 0.8 + vec2(sin(t * 0.3) * 0.4, cos(t * 0.25) * 0.3));
-    float w4 = sin(r * 4.5 - t * 0.9);
+  float i, d, z, T = iTime * uSpeed * uDirection;
+  vec3 O, p, S;
 
-    float plasma = (w1 + w2 + w3 + w4) * 0.25;
+  for (vec2 r = iResolution.xy, Q; ++i < 60.; O += o.w / d * o.xyz) {
+    p = z * normalize(vec3(C - .5 * r, r.y));
+    p.z -= 4.;
+    S = p;
+    d = p.y - T;
 
-    if (u_interactive > 0.5) {
-      vec2 m = u_mouse * 2.0 - 1.0;
-      m.x *= u_res.x / u_res.y;
-      m *= u_scale;
-      float d = length(uv - m);
-      plasma += sin(d * 7.0 - t * 2.0) * 0.22 * smoothstep(1.0, 0.0, d);
-    }
-
-    plasma = plasma * 0.5 + 0.5;
-
-    vec3 base      = vec3(0.043, 0.035, 0.024);
-    float intensity = pow(max(plasma - 0.32, 0.0) / 0.68, 2.0) * 0.6;
-    vec3 col       = base + u_color * intensity;
-
-    gl_FragColor = vec4(col, 1.0);
+    p.x += .4 * (1. + p.y) * sin(d + p.x * 0.1) * cos(.34 * d + p.x * 0.05);
+    Q = p.xz *= mat2(cos(p.y + vec4(0, 11, 33, 0) - T));
+    z += d = abs(sqrt(length(Q * Q)) - .25 * (5. + S.y)) / 3. + 8e-4;
+    o = 1. + sin(S.y + p.z * .5 + S.z - length(S - p) + vec4(2, 1, 0, 8));
   }
-`;
 
-function buildProgram(gl: WebGLRenderingContext) {
-  const compile = (type: number, src: string) => {
-    const s = gl.createShader(type)!;
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    return s;
-  };
-  const prog = gl.createProgram()!;
-  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
-  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
-  gl.linkProgram(prog);
-  return prog;
+  o.xyz = tanh(O / 1e4);
 }
 
-export default function Plasma({
-  color = "#c9a96e",
-  speed = 0.6,
+bool finite1(float x) { return !(isnan(x) || isinf(x)); }
+vec3 sanitize(vec3 c) {
+  return vec3(
+    finite1(c.r) ? c.r : 0.0,
+    finite1(c.g) ? c.g : 0.0,
+    finite1(c.b) ? c.b : 0.0
+  );
+}
+
+void main() {
+  vec4 o = vec4(0.0);
+  mainImage(o, gl_FragCoord.xy);
+  vec3 rgb = sanitize(o.rgb);
+
+  float intensity = (rgb.r + rgb.g + rgb.b) / 3.0;
+  vec3 customColor = intensity * uCustomColor;
+  vec3 finalColor = mix(rgb, customColor, step(0.5, uUseCustomColor));
+
+  float alpha = length(rgb) * uOpacity;
+  fragColor = vec4(finalColor, alpha);
+}
+`;
+
+export const Plasma: React.FC<PlasmaProps> = ({
+  color = "#ffffff",
+  speed = 1,
   direction = "forward",
-  scale = 1.0,
-  opacity = 0.8,
-  mouseInteractive = false,
-}: PlasmaProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef<[number, number]>([0.5, 0.5]);
+  scale = 1,
+  opacity = 1,
+  mouseInteractive = true,
+}) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mousePos = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const gl = canvas.getContext("webgl");
-    if (!gl) return;
+    if (!containerRef.current) return;
 
-    const prog = buildProgram(gl);
-    gl.useProgram(prog);
+    const useCustomColor = color ? 1.0 : 0.0;
+    const customColorRgb = color ? hexToRgb(color) : [1, 1, 1];
+    const directionMultiplier = direction === "reverse" ? -1.0 : 1.0;
 
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-      gl.STATIC_DRAW
-    );
-    const aPos = gl.getAttribLocation(prog, "a_pos");
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+    const renderer = new Renderer({
+      webgl: 2,
+      alpha: true,
+      antialias: false,
+      dpr: Math.min(window.devicePixelRatio || 1, 2),
+    });
+    const gl = renderer.gl;
+    const canvas = gl.canvas as HTMLCanvasElement;
+    canvas.style.display = "block";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    containerRef.current.appendChild(canvas);
 
-    const uTime  = gl.getUniformLocation(prog, "u_time");
-    const uRes   = gl.getUniformLocation(prog, "u_res");
-    const uColor = gl.getUniformLocation(prog, "u_color");
-    const uScale = gl.getUniformLocation(prog, "u_scale");
-    const uMouse = gl.getUniformLocation(prog, "u_mouse");
-    const uInter = gl.getUniformLocation(prog, "u_interactive");
+    const geometry = new Triangle(gl);
 
-    const rgb = hexToRgb(color);
-    gl.uniform3f(uColor, rgb[0], rgb[1], rgb[2]);
-    gl.uniform1f(uScale, scale);
-    gl.uniform1f(uInter, mouseInteractive ? 1.0 : 0.0);
+    const program = new Program(gl, {
+      vertex,
+      fragment,
+      uniforms: {
+        iTime:             { value: 0 },
+        iResolution:       { value: new Float32Array([1, 1]) },
+        uCustomColor:      { value: new Float32Array(customColorRgb) },
+        uUseCustomColor:   { value: useCustomColor },
+        uSpeed:            { value: speed * 0.4 },
+        uDirection:        { value: directionMultiplier },
+        uScale:            { value: scale },
+        uOpacity:          { value: opacity },
+        uMouse:            { value: new Float32Array([0, 0]) },
+        uMouseInteractive: { value: mouseInteractive ? 1.0 : 0.0 },
+      },
+    });
 
-    const resize = () => {
-      canvas.width  = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      gl.viewport(0, 0, canvas.width, canvas.height);
+    const mesh = new Mesh(gl, { geometry, program });
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!mouseInteractive) return;
+      const rect = containerRef.current!.getBoundingClientRect();
+      mousePos.current.x = e.clientX - rect.left;
+      mousePos.current.y = e.clientY - rect.top;
+      const mouseUniform = program.uniforms.uMouse.value as Float32Array;
+      mouseUniform[0] = mousePos.current.x;
+      mouseUniform[1] = mousePos.current.y;
     };
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas);
-    resize();
 
-    const onMouse = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = [
-        (e.clientX - rect.left) / rect.width,
-        1 - (e.clientY - rect.top) / rect.height,
-      ];
+    if (mouseInteractive) {
+      containerRef.current.addEventListener("mousemove", handleMouseMove);
+    }
+
+    const setSize = () => {
+      const rect = containerRef.current!.getBoundingClientRect();
+      const width  = Math.max(1, Math.floor(rect.width));
+      const height = Math.max(1, Math.floor(rect.height));
+      renderer.setSize(width, height);
+      const res = program.uniforms.iResolution.value as Float32Array;
+      res[0] = gl.drawingBufferWidth;
+      res[1] = gl.drawingBufferHeight;
     };
-    if (mouseInteractive) canvas.addEventListener("mousemove", onMouse);
 
-    let raf: number;
+    const ro = new ResizeObserver(setSize);
+    ro.observe(containerRef.current);
+    setSize();
+
+    let raf = 0;
     const t0 = performance.now();
-    const render = (now: number) => {
-      const elapsed = ((now - t0) / 1000) * speed * (direction === "backward" ? -1 : 1);
-      gl.uniform1f(uTime, elapsed);
-      gl.uniform2f(uRes, canvas.width, canvas.height);
-      gl.uniform2f(uMouse, mouseRef.current[0], mouseRef.current[1]);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      raf = requestAnimationFrame(render);
+
+    const loop = (t: number) => {
+      const timeValue = (t - t0) * 0.001;
+
+      if (direction === "pingpong") {
+        const pingpongDuration = 10;
+        const segmentTime = timeValue % pingpongDuration;
+        const isForward = Math.floor(timeValue / pingpongDuration) % 2 === 0;
+        const u = segmentTime / pingpongDuration;
+        const smooth = u * u * (3 - 2 * u);
+        const pingpongTime = isForward
+          ? smooth * pingpongDuration
+          : (1 - smooth) * pingpongDuration;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (program.uniforms.uDirection as any).value = 1.0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (program.uniforms.iTime as any).value = pingpongTime;
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (program.uniforms.iTime as any).value = timeValue;
+      }
+
+      renderer.render({ scene: mesh });
+      raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(render);
+
+    raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      if (mouseInteractive) canvas.removeEventListener("mousemove", onMouse);
+      if (mouseInteractive && containerRef.current) {
+        containerRef.current.removeEventListener("mousemove", handleMouseMove);
+      }
+      try {
+        containerRef.current?.removeChild(canvas);
+      } catch {
+        // 이미 제거된 경우 무시
+      }
     };
-  }, [color, speed, direction, scale, mouseInteractive]);
+  }, [color, speed, direction, scale, opacity, mouseInteractive]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity }}
+    <div
+      ref={containerRef}
+      className="w-full h-full relative overflow-hidden"
     />
   );
-}
+};
+
+export default Plasma;

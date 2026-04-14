@@ -2,24 +2,59 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { motion, AnimatePresence } from "motion/react";
 import StarBorder from "../components/StarBorder";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 /* ── 상수 ────────────────────────────────────────────────── */
-const MBTI_GRID = [
-  ["INTJ", "INTP", "ENTJ", "ENTP"],
-  ["INFJ", "INFP", "ENFJ", "ENFP"],
-  ["ISTJ", "ISTP", "ESTJ", "ESTP"],
-  ["ISFJ", "ISFP", "ESFJ", "ESFP"],
-];
-const MBTI_ALL = MBTI_GRID.flat();
+const MBTI_ALL = [
+  "INTJ","INTP","ENTJ","ENTP",
+  "INFJ","INFP","ENFJ","ENFP",
+  "ISTJ","ISTP","ESTJ","ESTP",
+  "ISFJ","ISFP","ESFJ","ESFP",
+] as const;
 
 const CONC_LIST = [
-  { key: "EDC", label: "EDC", sub: "오 드 코롱 · 2~4%" },
-  { key: "EDT", label: "EDT", sub: "오 드 뚜알렛 · 5~15%" },
-  { key: "EDP", label: "EDP", sub: "오 드 퍼퓸 · 15~20%" },
+  { key: "EDC",     label: "EDC",    sub: "오 드 코롱 · 2~4%" },
+  { key: "EDT",     label: "EDT",    sub: "오 드 뚜알렛 · 5~15%" },
+  { key: "EDP",     label: "EDP",    sub: "오 드 퍼퓸 · 15~20%" },
   { key: "PERFUME", label: "PARFUM", sub: "퍼퓸 · 20~30%" },
-];
+] as const;
+
+/* ── Zod 스키마 ──────────────────────────────────────────── */
+const schema = z.object({
+  name: z
+    .string()
+    .min(1, "이름을 입력해주세요.")
+    .max(20, "이름은 20자 이내로 입력해주세요."),
+  age: z
+    .string()
+    .min(1, "나이를 입력해주세요.")
+    .regex(/^\d{1,2}$/, "1~99 사이의 숫자를 입력해주세요.")
+    .refine((v) => +v >= 1 && +v <= 99, "1~99 사이의 나이를 입력해주세요."),
+  mbti: z
+    .string()
+    .min(1, "MBTI 유형을 선택해주세요."),
+  concentration: z
+    .string()
+    .min(1, "부향률을 선택해주세요."),
+  review: z
+    .string()
+    .min(10, "리뷰는 최소 10자 이상 작성해주세요.")
+    .max(500, "리뷰는 500자 이내로 작성해주세요."),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 /* ── 모달 래퍼 ───────────────────────────────────────────── */
 function Modal({
@@ -42,14 +77,12 @@ function Modal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* 딤 배경 */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
-          {/* 모달 카드 */}
           <motion.div
-            className="relative z-10 w-full max-w-lg rounded-2xl border border-[#e8c070]/30 bg-[#1e1e1e]/60 p-6 sm:p-8 shadow-2xl"
+            className="relative z-10 w-full max-w-lg rounded-2xl border border-[#e8c070]/30 bg-[#231c12]/95 p-6 sm:p-8 shadow-2xl"
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
@@ -78,6 +111,7 @@ function Modal({
 function Chip({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="flex items-center gap-2 px-4 py-2 text-xs tracking-[0.2em] border border-[#e8c070]/60 text-[#e8c070] rounded-full hover:bg-[#e8c070]/15 transition-all"
     >
@@ -89,31 +123,36 @@ function Chip({ label, onClick }: { label: string; onClick: () => void }) {
 
 /* ── 메인 페이지 ─────────────────────────────────────────── */
 export default function ReviewPage() {
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [mbti, setMbti] = useState("");
-  const [conc, setConc] = useState("");
-  const [review, setReview] = useState("");
   const [mbtiOpen, setMbtiOpen] = useState(false);
   const [concOpen, setConcOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleAgeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value.replace(/\D/g, "").slice(0, 2);
-    setAge(v);
-  };
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: "",
+      age: "",
+      mbti: "",
+      concentration: "",
+      review: "",
+    },
+    mode: "onTouched",
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log({ name, age, mbti, conc, review });
+  const onSubmit = (data: FormValues) => {
+    console.log(data);
     setSubmitted(true);
   };
 
   const inputCls =
-    "w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] transition-colors duration-300";
+    "w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] aria-invalid:border-red-400 transition-colors duration-300";
+
+  const selectedMbti = useWatch({ control: form.control, name: "mbti" });
+  const selectedConc = useWatch({ control: form.control, name: "concentration" });
 
   return (
     <div className="relative min-h-screen bg-[#1c1710] text-[#fff8ee] flex flex-col">
+
       {/* 배경 글로우 */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[#e8c070]/12 blur-[100px]" />
@@ -135,6 +174,7 @@ export default function ReviewPage() {
       {/* 폼 영역 */}
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg">
+
           {/* 타이틀 */}
           <div className="mb-10 text-center">
             <div className="flex items-center justify-center gap-3 mb-3">
@@ -175,111 +215,162 @@ export default function ReviewPage() {
                 </Link>
               </motion.div>
             ) : (
-              /* 리뷰 폼 */
-              <motion.form
+              <motion.div
                 key="form"
-                onSubmit={handleSubmit}
-                className="flex flex-col gap-7"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
-                {/* 이름 */}
-                <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-1">
-                    이름
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="이름을 입력해주세요"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className={inputCls}
-                  />
-                </div>
-
-                {/* 나이 */}
-                <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-1">
-                    나이
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="ex) 28"
-                    value={age}
-                    onChange={handleAgeInput}
-                    maxLength={2}
-                    required
-                    className={inputCls}
-                  />
-                </div>
-
-                {/* MBTI */}
-                <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-2">
-                    MBTI
-                  </label>
-                  {mbti ? (
-                    <Chip label={mbti} onClick={() => setMbtiOpen(true)} />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setMbtiOpen(true)}
-                      className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
-                    >
-                      MBTI 유형을 선택해주세요
-                    </button>
-                  )}
-                </div>
-
-                {/* 부향률 */}
-                <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-2">
-                    부향률
-                  </label>
-                  {conc ? (
-                    <Chip
-                      label={
-                        CONC_LIST.find((c) => c.key === conc)?.label ?? conc
-                      }
-                      onClick={() => setConcOpen(true)}
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="flex flex-col gap-7"
+                  >
+                    {/* 이름 */}
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>이름</FormLabel>
+                          <FormControl>
+                            <input
+                              placeholder="이름을 입력해주세요"
+                              className={inputCls}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  ) : (
+
+                    {/* 나이 */}
+                    <FormField
+                      control={form.control}
+                      name="age"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>나이</FormLabel>
+                          <FormControl>
+                            <input
+                              inputMode="numeric"
+                              placeholder="ex) 28"
+                              maxLength={2}
+                              className={inputCls}
+                              {...field}
+                              onChange={(e) => {
+                                const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                                field.onChange(v);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* MBTI */}
+                    <FormField
+                      control={form.control}
+                      name="mbti"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>MBTI</FormLabel>
+                          <FormControl>
+                            <input type="hidden" {...field} />
+                          </FormControl>
+                          {selectedMbti ? (
+                            <Chip
+                              label={selectedMbti}
+                              onClick={() => setMbtiOpen(true)}
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setMbtiOpen(true);
+                                field.onBlur();
+                              }}
+                              className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
+                            >
+                              MBTI 유형을 선택해주세요
+                            </button>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* 부향률 */}
+                    <FormField
+                      control={form.control}
+                      name="concentration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>부향률</FormLabel>
+                          <FormControl>
+                            <input type="hidden" {...field} />
+                          </FormControl>
+                          {selectedConc ? (
+                            <Chip
+                              label={
+                                CONC_LIST.find((c) => c.key === selectedConc)
+                                  ?.label ?? selectedConc
+                              }
+                              onClick={() => setConcOpen(true)}
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConcOpen(true);
+                                field.onBlur();
+                              }}
+                              className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
+                            >
+                              부향률을 선택해주세요
+                            </button>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* 리뷰 */}
+                    <FormField
+                      control={form.control}
+                      name="review"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>리뷰</FormLabel>
+                          <FormControl>
+                            <textarea
+                              placeholder="향기에 대한 솔직한 경험을 적어주세요 (최소 10자)"
+                              rows={4}
+                              className="w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] aria-invalid:border-red-400 transition-colors duration-300 resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <div className="flex items-center justify-between">
+                            <FormMessage />
+                            <span className="text-[11px] text-[#887060] ml-auto">
+                              {field.value.length} / 500
+                            </span>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* 제출 */}
                     <button
-                      type="button"
-                      onClick={() => setConcOpen(true)}
-                      className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
+                      type="submit"
+                      className="mt-2 w-full py-4 text-xs tracking-[0.4em] uppercase bg-[#e8c070] text-[#1c1710] font-medium hover:bg-[#f5d480] transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      부향률을 선택해주세요
+                      리뷰 등록
                     </button>
-                  )}
-                </div>
-
-                {/* 리뷰 */}
-                <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-1">
-                    리뷰
-                  </label>
-                  <textarea
-                    placeholder="향기에 대한 솔직한 경험을 적어주세요"
-                    value={review}
-                    onChange={(e) => setReview(e.target.value)}
-                    required
-                    rows={4}
-                    className="w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] transition-colors duration-300 resize-none"
-                  />
-                </div>
-
-                {/* 제출 */}
-                <button
-                  type="submit"
-                  className="mt-2 w-full py-4 text-xs tracking-[0.4em] uppercase bg-[#e8c070] text-[#1c1710] font-medium hover:bg-[#f5d480] transition-colors duration-300 disabled:opacity-40"
-                  disabled={!name || !age || !mbti || !conc || !review}
-                >
-                  리뷰 등록
-                </button>
-              </motion.form>
+                  </form>
+                </Form>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
@@ -297,17 +388,17 @@ export default function ReviewPage() {
               key={type}
               as="button"
               type="button"
-              color={mbti === type ? "#e8c070" : "#8a7560"}
-              speed={mbti === type ? "2.5s" : "6s"}
+              color={selectedMbti === type ? "#e8c070" : "#8a7560"}
+              speed={selectedMbti === type ? "2.5s" : "6s"}
               className="w-full"
               onClick={() => {
-                setMbti(type);
+                form.setValue("mbti", type, { shouldValidate: true });
                 setMbtiOpen(false);
               }}
             >
               <span
                 className={`py-2 px-1 text-xs tracking-widest font-light transition-colors ${
-                  mbti === type
+                  selectedMbti === type
                     ? "text-[#e8c070]"
                     : "text-[#b8a888] hover:text-[#fff8ee]"
                 }`}
@@ -331,18 +422,18 @@ export default function ReviewPage() {
               key={item.key}
               as="button"
               type="button"
-              color={conc === item.key ? "#e8c070" : "#8a7560"}
-              speed={conc === item.key ? "2.5s" : "5s"}
+              color={selectedConc === item.key ? "#e8c070" : "#8a7560"}
+              speed={selectedConc === item.key ? "2.5s" : "5s"}
               className="w-full"
               onClick={() => {
-                setConc(item.key);
+                form.setValue("concentration", item.key, { shouldValidate: true });
                 setConcOpen(false);
               }}
             >
               <span className="flex flex-col items-center py-4 px-2 gap-1">
                 <span
                   className={`text-sm tracking-[0.2em] font-light transition-colors ${
-                    conc === item.key ? "text-[#e8c070]" : "text-[#d4c4aa]"
+                    selectedConc === item.key ? "text-[#e8c070]" : "text-[#d4c4aa]"
                   }`}
                 >
                   {item.label}
@@ -355,6 +446,7 @@ export default function ReviewPage() {
           ))}
         </div>
       </Modal>
+
     </div>
   );
 }
