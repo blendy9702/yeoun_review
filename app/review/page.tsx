@@ -44,24 +44,24 @@ function Modal({
         >
           {/* 딤 배경 */}
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
           {/* 모달 카드 */}
           <motion.div
-            className="relative z-10 w-full max-w-lg rounded-2xl border border-[#c9a96e]/20 bg-[#0f0c08]/95 p-6 sm:p-8 shadow-2xl"
+            className="relative z-10 w-full max-w-lg rounded-2xl border border-[#e8c070]/30 bg-[#1e1e1e]/60 p-6 sm:p-8 shadow-2xl"
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 28, stiffness: 360 }}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm tracking-[0.3em] text-[#c9a96e] uppercase">
+              <h3 className="text-sm tracking-[0.3em] text-[#e8c070] uppercase">
                 {title}
               </h3>
               <button
                 onClick={onClose}
-                className="text-[#7a6f60] hover:text-[#f0ebe0] transition-colors text-xl leading-none"
+                className="text-[#b8a888] hover:text-[#fff8ee] transition-colors text-xl leading-none"
               >
                 ✕
               </button>
@@ -79,10 +79,10 @@ function Chip({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 text-xs tracking-[0.2em] border border-[#c9a96e]/50 text-[#c9a96e] rounded-full hover:bg-[#c9a96e]/10 transition-all"
+      className="flex items-center gap-2 px-4 py-2 text-xs tracking-[0.2em] border border-[#e8c070]/60 text-[#e8c070] rounded-full hover:bg-[#e8c070]/15 transition-all"
     >
       {label}
-      <span className="text-[#7a6f60] text-[10px]">▾</span>
+      <span className="text-[#b8a888] text-[10px]">▾</span>
     </button>
   );
 }
@@ -110,24 +110,24 @@ export default function ReviewPage() {
   };
 
   const inputCls =
-    "w-full bg-transparent border-b border-[#3a3530] py-3 text-sm text-[#f0ebe0] placeholder-[#4a4035] focus:outline-none focus:border-[#c9a96e] transition-colors duration-300";
+    "w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] transition-colors duration-300";
 
   return (
-    <div className="relative min-h-screen bg-[#0b0906] text-[#f0ebe0] flex flex-col">
+    <div className="relative min-h-screen bg-[#1c1710] text-[#fff8ee] flex flex-col">
       {/* 배경 글로우 */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[#c9a96e]/8 blur-[100px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[#e8c070]/12 blur-[100px]" />
       </div>
 
       {/* 헤더 */}
-      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 border-b border-white/5">
+      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 border-b border-white/10">
         <Link
           href="/"
-          className="text-xs tracking-[0.35em] text-[#c9a96e] uppercase hover:text-[#e0c080] transition-colors"
+          className="text-xs tracking-[0.35em] text-[#e8c070] uppercase hover:text-[#f5d480] transition-colors"
         >
           ← Yeoun
         </Link>
-        <span className="text-[10px] tracking-[0.4em] text-[#4a4035] uppercase">
+        <span className="text-[10px] tracking-[0.4em] text-[#887060] uppercase">
           Review
         </span>
       </header>
@@ -138,16 +138,16 @@ export default function ReviewPage() {
           {/* 타이틀 */}
           <div className="mb-10 text-center">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="w-8 h-px bg-[#c9a96e]/40" />
-              <span className="text-[10px] tracking-[0.45em] text-[#c9a96e]/60 uppercase">
+              <div className="w-8 h-px bg-[#e8c070]/50" />
+              <span className="text-[10px] tracking-[0.45em] text-[#e8c070]/75 uppercase">
                 Niche Perfume Review
               </span>
-              <div className="w-8 h-px bg-[#c9a96e]/40" />
+              <div className="w-8 h-px bg-[#e8c070]/50" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extralight tracking-[0.15em] text-[#f0ebe0]">
+            <h1 className="text-2xl sm:text-3xl font-extralight tracking-[0.15em] text-[#fff8ee]">
               리뷰 작성
             </h1>
-            <p className="mt-2 text-xs text-[#5a5045] tracking-widest">
+            <p className="mt-2 text-xs text-[#887060] tracking-widest">
               당신의 향기 경험을 남겨주세요
             </p>
           </div>
@@ -161,15 +161,15 @@ export default function ReviewPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center py-16 flex flex-col items-center gap-6"
               >
-                <div className="w-14 h-14 rounded-full border border-[#c9a96e]/50 flex items-center justify-center text-[#c9a96e] text-2xl">
+                <div className="w-14 h-14 rounded-full border border-[#e8c070]/60 flex items-center justify-center text-[#e8c070] text-2xl">
                   ✓
                 </div>
-                <p className="text-[#a09080] tracking-widest text-sm">
+                <p className="text-[#b8a888] tracking-widest text-sm">
                   리뷰가 등록되었습니다
                 </p>
                 <Link
                   href="/"
-                  className="text-xs tracking-[0.3em] uppercase text-[#c9a96e] border border-[#c9a96e]/30 px-6 py-2 hover:bg-[#c9a96e]/10 transition-colors"
+                  className="text-xs tracking-[0.3em] uppercase text-[#e8c070] border border-[#e8c070]/40 px-6 py-2 hover:bg-[#e8c070]/15 transition-colors"
                 >
                   메인으로
                 </Link>
@@ -185,7 +185,7 @@ export default function ReviewPage() {
               >
                 {/* 이름 */}
                 <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#7a6f60] uppercase mb-1">
+                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-1">
                     이름
                   </label>
                   <input
@@ -200,7 +200,7 @@ export default function ReviewPage() {
 
                 {/* 나이 */}
                 <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#7a6f60] uppercase mb-1">
+                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-1">
                     나이
                   </label>
                   <input
@@ -217,7 +217,7 @@ export default function ReviewPage() {
 
                 {/* MBTI */}
                 <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#7a6f60] uppercase mb-2">
+                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-2">
                     MBTI
                   </label>
                   {mbti ? (
@@ -226,7 +226,7 @@ export default function ReviewPage() {
                     <button
                       type="button"
                       onClick={() => setMbtiOpen(true)}
-                      className="text-xs tracking-[0.2em] text-[#4a4035] border-b border-[#3a3530] pb-3 w-full text-left hover:text-[#7a6f60] transition-colors"
+                      className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
                     >
                       MBTI 유형을 선택해주세요
                     </button>
@@ -235,7 +235,7 @@ export default function ReviewPage() {
 
                 {/* 부향률 */}
                 <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#7a6f60] uppercase mb-2">
+                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-2">
                     부향률
                   </label>
                   {conc ? (
@@ -249,7 +249,7 @@ export default function ReviewPage() {
                     <button
                       type="button"
                       onClick={() => setConcOpen(true)}
-                      className="text-xs tracking-[0.2em] text-[#4a4035] border-b border-[#3a3530] pb-3 w-full text-left hover:text-[#7a6f60] transition-colors"
+                      className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
                     >
                       부향률을 선택해주세요
                     </button>
@@ -258,7 +258,7 @@ export default function ReviewPage() {
 
                 {/* 리뷰 */}
                 <div>
-                  <label className="block text-[12px] tracking-[0.35em] text-[#7a6f60] uppercase mb-1">
+                  <label className="block text-[12px] tracking-[0.35em] text-[#b8a888] uppercase mb-1">
                     리뷰
                   </label>
                   <textarea
@@ -267,14 +267,14 @@ export default function ReviewPage() {
                     onChange={(e) => setReview(e.target.value)}
                     required
                     rows={4}
-                    className="w-full bg-transparent border-b border-[#3a3530] py-3 text-sm text-[#f0ebe0] placeholder-[#4a4035] focus:outline-none focus:border-[#c9a96e] transition-colors duration-300 resize-none"
+                    className="w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] transition-colors duration-300 resize-none"
                   />
                 </div>
 
                 {/* 제출 */}
                 <button
                   type="submit"
-                  className="mt-2 w-full py-4 text-xs tracking-[0.4em] uppercase bg-[#c9a96e] text-[#0b0906] font-medium hover:bg-[#e0c080] transition-colors duration-300 disabled:opacity-40"
+                  className="mt-2 w-full py-4 text-xs tracking-[0.4em] uppercase bg-[#e8c070] text-[#1c1710] font-medium hover:bg-[#f5d480] transition-colors duration-300 disabled:opacity-40"
                   disabled={!name || !age || !mbti || !conc || !review}
                 >
                   리뷰 등록
@@ -297,7 +297,7 @@ export default function ReviewPage() {
               key={type}
               as="button"
               type="button"
-              color={mbti === type ? "#c9a96e" : "#5a4f3f"}
+              color={mbti === type ? "#e8c070" : "#8a7560"}
               speed={mbti === type ? "2.5s" : "6s"}
               className="w-full"
               onClick={() => {
@@ -308,8 +308,8 @@ export default function ReviewPage() {
               <span
                 className={`py-2 px-1 text-xs tracking-widest font-light transition-colors ${
                   mbti === type
-                    ? "text-[#c9a96e]"
-                    : "text-[#7a6f60] hover:text-[#f0ebe0]"
+                    ? "text-[#e8c070]"
+                    : "text-[#b8a888] hover:text-[#fff8ee]"
                 }`}
               >
                 {type}
@@ -331,7 +331,7 @@ export default function ReviewPage() {
               key={item.key}
               as="button"
               type="button"
-              color={conc === item.key ? "#c9a96e" : "#5a4f3f"}
+              color={conc === item.key ? "#e8c070" : "#8a7560"}
               speed={conc === item.key ? "2.5s" : "5s"}
               className="w-full"
               onClick={() => {
@@ -342,12 +342,12 @@ export default function ReviewPage() {
               <span className="flex flex-col items-center py-4 px-2 gap-1">
                 <span
                   className={`text-sm tracking-[0.2em] font-light transition-colors ${
-                    conc === item.key ? "text-[#c9a96e]" : "text-[#a09080]"
+                    conc === item.key ? "text-[#e8c070]" : "text-[#d4c4aa]"
                   }`}
                 >
                   {item.label}
                 </span>
-                <span className="text-[10px] text-[#5a4f3f] tracking-wide text-center leading-4">
+                <span className="text-[10px] text-[#8a7560] tracking-wide text-center leading-4">
                   {item.sub}
                 </span>
               </span>
