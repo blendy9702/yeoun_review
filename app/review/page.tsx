@@ -175,7 +175,7 @@ export default function ReviewPage() {
   };
 
   const inputCls =
-    "w-full bg-transparent border-b border-[#c4bbb0] py-3 text-sm text-[#1e1a14] placeholder-[#8a8276] focus:outline-none focus:border-[#3d5a38] aria-invalid:border-red-400 transition-colors duration-300";
+    "w-full bg-transparent border-b border-[#c4bbb0] py-3 text-base md:text-sm text-[#1e1a14] placeholder-[#8a8276] focus:outline-none focus:border-[#3d5a38] aria-invalid:border-red-400 transition-colors duration-300";
 
   const selectedMbti = useWatch({ control: form.control, name: "mbti" });
   const selectedConc = useWatch({
@@ -380,7 +380,7 @@ export default function ReviewPage() {
                             <textarea
                               placeholder="향기에 대한 솔직한 경험을 적어주세요 (최소 10자)"
                               rows={4}
-                              className="w-full bg-transparent border-b border-[#c4bbb0] py-3 text-sm text-[#1e1a14] placeholder-[#8a8276] focus:outline-none focus:border-[#3d5a38] aria-invalid:border-red-400 transition-colors duration-300 resize-none"
+                              className="w-full bg-transparent border-b border-[#c4bbb0] py-3 text-base md:text-sm text-[#1e1a14] placeholder-[#8a8276] focus:outline-none focus:border-[#3d5a38] aria-invalid:border-red-400 transition-colors duration-300 resize-none"
                               {...field}
                             />
                           </FormControl>
