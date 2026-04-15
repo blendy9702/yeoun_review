@@ -131,7 +131,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
 
     const dprCap = lowPower ? 1 : Math.min(window.devicePixelRatio || 1, 2);
     const loopMax = lowPower ? 32 : 60;
-    const minFrameMs = lowPower ? 1000 / 30 : 0;
+    const minFrameMs = lowPower ? 1000 / 60 : 0;
     const useMouse =
       mouseInteractive && !lowPower && !("ontouchstart" in window);
 
