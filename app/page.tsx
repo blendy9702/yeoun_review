@@ -5,15 +5,14 @@ import RotatingText from "./components/RotatingText";
 export default function Home() {
   return (
     <div className="relative flex flex-col min-h-screen bg-[#1c1710] text-[#fff8ee] overflow-hidden">
-      {/* Plasma 배경 */}
       <div className="absolute inset-0 pointer-events-none">
         <Plasma
           color="#e8c070"
           speed={0.4}
           direction="forward"
-          scale={1}
-          opacity={0.7}
-          mouseInteractive={true}
+          scale={0.8}
+          opacity={1}
+          quality="auto"
         />
       </div>
 

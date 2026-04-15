@@ -3,6 +3,8 @@
 import React, { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
 
+type PlasmaQuality = "auto" | "high" | "low";
+
 interface PlasmaProps {
   color?: string;
   speed?: number;
@@ -10,6 +12,8 @@ interface PlasmaProps {
   scale?: number;
   opacity?: number;
   mouseInteractive?: boolean;
+  /** auto: 좁은 화면·절전 모드에서 DPR·셰이더 반복·FPS를 줄임 (모바일 버벅임 완화) */
+  quality?: PlasmaQuality;
 }
 
 const hexToRgb = (hex: string): [number, number, number] => {
@@ -45,6 +49,7 @@ uniform float uScale;
 uniform float uOpacity;
 uniform vec2 uMouse;
 uniform float uMouseInteractive;
+uniform float uLoopMax;
 out vec4 fragColor;
 
 void mainImage(out vec4 o, vec2 C) {
@@ -57,7 +62,7 @@ void mainImage(out vec4 o, vec2 C) {
   float i, d, z, T = iTime * uSpeed * uDirection;
   vec3 O, p, S;
 
-  for (vec2 r = iResolution.xy, Q; ++i < 60.; O += o.w / d * o.xyz) {
+  for (vec2 r = iResolution.xy, Q; ++i < uLoopMax; O += o.w / d * o.xyz) {
     p = z * normalize(vec3(C - .5 * r, r.y));
     p.z -= 4.;
     S = p;
@@ -102,12 +107,33 @@ export const Plasma: React.FC<PlasmaProps> = ({
   scale = 1,
   opacity = 1,
   mouseInteractive = true,
+  quality = "auto",
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mousePos = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    const shortSide =
+      typeof window !== "undefined"
+        ? Math.min(window.innerWidth, window.innerHeight)
+        : 1024;
+    const narrow = shortSide < 768;
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let lowPower = false;
+    if (quality === "low") lowPower = true;
+    else if (quality === "high") lowPower = false;
+    else lowPower = narrow || reduceMotion;
+
+    const dprCap = lowPower ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    const loopMax = lowPower ? 32 : 60;
+    const minFrameMs = lowPower ? 1000 / 30 : 0;
+    const useMouse =
+      mouseInteractive && !lowPower && !("ontouchstart" in window);
 
     const useCustomColor = color ? 1.0 : 0.0;
     const customColorRgb = color ? hexToRgb(color) : [1, 1, 1];
@@ -117,7 +143,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
       webgl: 2,
       alpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: dprCap,
     });
     const gl = renderer.gl;
     const canvas = gl.canvas as HTMLCanvasElement;
@@ -141,14 +167,15 @@ export const Plasma: React.FC<PlasmaProps> = ({
         uScale:            { value: scale },
         uOpacity:          { value: opacity },
         uMouse:            { value: new Float32Array([0, 0]) },
-        uMouseInteractive: { value: mouseInteractive ? 1.0 : 0.0 },
+        uMouseInteractive: { value: useMouse ? 1.0 : 0.0 },
+        uLoopMax:          { value: loopMax },
       },
     });
 
     const mesh = new Mesh(gl, { geometry, program });
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!mouseInteractive) return;
+      if (!useMouse) return;
       const rect = containerRef.current!.getBoundingClientRect();
       mousePos.current.x = e.clientX - rect.left;
       mousePos.current.y = e.clientY - rect.top;
@@ -157,7 +184,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
       mouseUniform[1] = mousePos.current.y;
     };
 
-    if (mouseInteractive) {
+    if (useMouse) {
       containerRef.current.addEventListener("mousemove", handleMouseMove);
     }
 
@@ -177,8 +204,19 @@ export const Plasma: React.FC<PlasmaProps> = ({
 
     let raf = 0;
     const t0 = performance.now();
+    let lastRender = 0;
 
     const loop = (t: number) => {
+      if (
+        minFrameMs > 0 &&
+        lastRender > 0 &&
+        t - lastRender < minFrameMs
+      ) {
+        raf = requestAnimationFrame(loop);
+        return;
+      }
+      lastRender = t;
+
       const timeValue = (t - t0) * 0.001;
 
       if (direction === "pingpong") {
@@ -208,7 +246,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      if (mouseInteractive && containerRef.current) {
+      if (useMouse && containerRef.current) {
         containerRef.current.removeEventListener("mousemove", handleMouseMove);
       }
       try {
@@ -217,7 +255,7 @@ export const Plasma: React.FC<PlasmaProps> = ({
         // 이미 제거된 경우 무시
       }
     };
-  }, [color, speed, direction, scale, opacity, mouseInteractive]);
+  }, [color, speed, direction, scale, opacity, mouseInteractive, quality]);
 
   return (
     <div
