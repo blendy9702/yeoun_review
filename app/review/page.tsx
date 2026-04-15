@@ -431,7 +431,7 @@ export default function ReviewPage() {
               key={type}
               as="button"
               type="button"
-              color={selectedMbti === type ? "#3d5a38" : "#9a9488"}
+              color={selectedMbti === type ? "#3d5a38" : "#c4bbb0"}
               speed={selectedMbti === type ? "2.5s" : "6s"}
               className="w-full"
               onClick={() => {
@@ -442,8 +442,8 @@ export default function ReviewPage() {
               <span
                 className={`py-2 px-1 text-xs tracking-widest font-light transition-colors ${
                   selectedMbti === type
-                    ? "text-[#3d5a38]"
-                    : "text-[#6b6459] hover:text-[#1e1a14]"
+                    ? "text-[#3d5a38] font-normal"
+                    : "text-[#4a4540] hover:text-[#1e1a14]"
                 }`}
               >
                 {type}
@@ -465,7 +465,7 @@ export default function ReviewPage() {
               key={item.key}
               as="button"
               type="button"
-              color={selectedConc === item.key ? "#3d5a38" : "#9a9488"}
+              color={selectedConc === item.key ? "#3d5a38" : "#c4bbb0"}
               speed={selectedConc === item.key ? "2.5s" : "5s"}
               className="w-full"
               onClick={() => {
@@ -477,15 +477,15 @@ export default function ReviewPage() {
             >
               <span className="flex flex-col items-center py-4 px-2 gap-1">
                 <span
-                  className={`text-sm tracking-[0.2em] font-light transition-colors ${
+                  className={`text-[14px] tracking-[0.2em] font-light transition-colors ${
                     selectedConc === item.key
-                      ? "text-[#3d5a38]"
-                      : "text-[#6b6459]"
+                      ? "text-[#3d5a38] font-normal"
+                      : "text-[#4a4540]"
                   }`}
                 >
                   {item.label}
                 </span>
-                <span className="text-[10px] text-[#8a8276] tracking-wide text-center leading-4">
+                <span className="text-[12px] text-[#6b6459] tracking-wide text-center leading-4">
                   {item.sub}
                 </span>
               </span>
