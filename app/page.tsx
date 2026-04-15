@@ -5,39 +5,29 @@ import RotatingText from "./components/RotatingText";
 
 export default function Home() {
   return (
-    <div className="relative flex flex-col min-h-screen bg-[#1c1710] text-[#fff8ee] overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
+    <div className="relative flex flex-col min-h-screen bg-[#f8efe2] text-[#1e1a14] overflow-hidden">
+      {/* fixed: 뒤로가기 시 flex 레이아웃 전에 absolute 자식 높이가 0이 되는 문제 방지 */}
+      <div className="fixed inset-0 z-0 h-[100dvh] w-full pointer-events-none">
         <Plasma
-          color="#e8c070"
+          color="#f0eae0"
           speed={0.4}
           direction="forward"
           scale={0.8}
-          opacity={1}
+          opacity={0.5}
           quality="auto"
         />
       </div>
 
       {/* 상단 네비게이션 */}
       <header className="relative z-10 flex items-center justify-between px-8 md:px-16 py-6">
-        <span className="text-xs tracking-[0.35em] text-[#e8c070] uppercase font-light">
+        <span className="text-xs tracking-[0.35em] text-[#1e1a14] uppercase font-light">
           Yeoun
         </span>
-        {/* <nav className="hidden md:flex items-center gap-10">
-          {["Reviews", "Story", "Creative"].map((item) => (
-            <a
-              key={item}
-              href="#"
-              className="text-xs tracking-[0.2em] uppercase text-[#d4c4aa] hover:text-[#fff8ee] transition-colors duration-300"
-            >
-              {item}
-            </a>
-          ))}
-        </nav> */}
         <a
           href="https://yeoun-five.vercel.app/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs tracking-[0.2em] uppercase text-[#e8c070] border border-[#e8c070]/50 px-4 py-2 hover:bg-[#e8c070]/15 transition-colors duration-300"
+          className="text-xs tracking-[0.2em] uppercase text-[#1e1a14] border border-[#1e1a14]/50 px-4 py-2 hover:bg-[#1e1a14]/8 transition-colors duration-300"
         >
           공식 사이트
         </a>
@@ -47,20 +37,20 @@ export default function Home() {
       <main className="relative z-10 flex flex-1 flex-col items-center justify-center text-center px-6 gap-8">
         {/* 장식 라인 */}
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-12 h-px bg-[#e8c070]/60" />
-          <span className="text-[10px] tracking-[0.45em] text-[#e8c070]/80 uppercase">
+          <div className="w-12 h-px bg-[#3d5a38]/50" />
+          <span className="text-[12px] tracking-[0.45em] text-[#6b6459] uppercase">
             Niche Perfume
           </span>
-          <div className="w-12 h-px bg-[#e8c070]/60" />
+          <div className="w-12 h-px bg-[#3d5a38]/50" />
         </div>
 
         {/* 메인 타이틀 */}
         <h1 className="flex flex-col items-center gap-1 leading-none">
-          <span className="text-[clamp(3.5rem,12vw,9rem)] font-extralight tracking-[0.2em] text-[#fff8ee]">
+          <span className="text-[clamp(3.5rem,12vw,9rem)] font-extralight tracking-[0.2em] text-[#1e1a14]">
             YEOUN
           </span>
-          <span className="w-full h-px bg-linear-to-r from-transparent via-[#e8c070]/70 to-transparent my-1" />
-          <span className="text-[clamp(2rem,7vw,5.5rem)] font-extralight tracking-[0.35em] text-[#e8c070] overflow-hidden h-[1.2em] flex items-center">
+          <span className="w-full h-px bg-linear-to-r from-transparent via-[#3d5a38]/50 to-transparent my-1" />
+          <span className="text-[clamp(2rem,7vw,5.5rem)] font-extralight tracking-[0.35em] text-[#3d5a38] overflow-hidden h-[1.2em] flex items-center">
             <RotatingText
               texts={["REVIEW", "STORY", "CREATIVE"]}
               mainClassName="inline-flex"
@@ -80,7 +70,7 @@ export default function Home() {
         </h1>
 
         {/* 서브 카피 */}
-        <p className="max-w-md text-sm md:text-base leading-7 text-[#b8a888] tracking-wide font-light mt-2">
+        <p className="max-w-md text-sm md:text-base leading-7 text-[#6b6459] tracking-wide font-light mt-2">
           향기는 기억이 된다.
           <br />
           여운 향수의 섬세한 이야기를 담아냅니다.
@@ -91,7 +81,7 @@ export default function Home() {
           <ReviewsComingSoonButton />
           <Link
             href="/review"
-            className="px-8 py-3 text-xs tracking-[0.3em] uppercase border border-[#fff8ee]/30 text-[#d4c4aa] hover:text-[#fff8ee] hover:border-[#fff8ee]/60 transition-colors duration-300"
+            className="px-8 py-3 text-xs tracking-[0.3em] uppercase border border-[#1e1a14]/30 text-[#6b6459] hover:text-[#1e1a14] hover:border-[#1e1a14]/60 transition-colors duration-300"
           >
             리뷰 작성
           </Link>
@@ -100,10 +90,10 @@ export default function Home() {
 
       {/* 하단 */}
       <footer className="relative z-10 flex items-center justify-between px-8 md:px-16 py-6">
-        <span className="text-[10px] tracking-[0.25em] text-[#887060] uppercase">
+        <span className="text-[10px] tracking-[0.25em] text-[#8a8276] uppercase">
           © 2025 Yeoun
         </span>
-        <span className="text-[10px] tracking-[0.25em] text-[#887060] uppercase">
+        <span className="text-[10px] tracking-[0.25em] text-[#8a8276] uppercase">
           Crafted with care
         </span>
       </footer>

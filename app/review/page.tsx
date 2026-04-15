@@ -19,16 +19,28 @@ import {
 
 /* ── 상수 ────────────────────────────────────────────────── */
 const MBTI_ALL = [
-  "INTJ","INTP","ENTJ","ENTP",
-  "INFJ","INFP","ENFJ","ENFP",
-  "ISTJ","ISTP","ESTJ","ESTP",
-  "ISFJ","ISFP","ESFJ","ESFP",
+  "INTJ",
+  "INTP",
+  "ENTJ",
+  "ENTP",
+  "INFJ",
+  "INFP",
+  "ENFJ",
+  "ENFP",
+  "ISTJ",
+  "ISTP",
+  "ESTJ",
+  "ESTP",
+  "ISFJ",
+  "ISFP",
+  "ESFJ",
+  "ESFP",
 ] as const;
 
 const CONC_LIST = [
-  { key: "EDC",     label: "EDC",    sub: "오 드 코롱 · 2~4%" },
-  { key: "EDT",     label: "EDT",    sub: "오 드 뚜알렛 · 5~15%" },
-  { key: "EDP",     label: "EDP",    sub: "오 드 퍼퓸 · 15~20%" },
+  { key: "EDC", label: "EDC", sub: "오 드 코롱 · 2~4%" },
+  { key: "EDT", label: "EDT", sub: "오 드 뚜알렛 · 5~15%" },
+  { key: "EDP", label: "EDP", sub: "오 드 퍼퓸 · 15~20%" },
   { key: "PERFUME", label: "PARFUM", sub: "퍼퓸 · 20~30%" },
 ] as const;
 
@@ -43,12 +55,8 @@ const schema = z.object({
     .min(1, "나이를 입력해주세요.")
     .regex(/^\d{1,2}$/, "1~99 사이의 숫자를 입력해주세요.")
     .refine((v) => +v >= 1 && +v <= 99, "1~99 사이의 나이를 입력해주세요."),
-  mbti: z
-    .string()
-    .min(1, "MBTI 유형을 선택해주세요."),
-  concentration: z
-    .string()
-    .min(1, "부향률을 선택해주세요."),
+  mbti: z.string().min(1, "MBTI 유형을 선택해주세요."),
+  concentration: z.string().min(1, "부향률을 선택해주세요."),
   review: z
     .string()
     .min(10, "리뷰는 최소 10자 이상 작성해주세요.")
@@ -83,19 +91,19 @@ function Modal({
             onClick={onClose}
           />
           <motion.div
-            className="relative z-10 w-full max-w-lg rounded-2xl border border-[#e8c070]/30 bg-[#231c12]/95 p-6 sm:p-8 shadow-2xl"
+            className="relative z-10 w-full max-w-lg rounded-2xl border border-[#3d5a38]/20 bg-[#faf7f2]/98 p-6 sm:p-8 shadow-2xl"
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 28, stiffness: 360 }}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm tracking-[0.3em] text-[#e8c070] uppercase">
+              <h3 className="text-sm tracking-[0.3em] text-[#3d5a38] uppercase">
                 {title}
               </h3>
               <button
                 onClick={onClose}
-                className="text-[#b8a888] hover:text-[#fff8ee] transition-colors text-xl leading-none"
+                className="text-[#8a8276] hover:text-[#1e1a14] transition-colors text-xl leading-none"
               >
                 ✕
               </button>
@@ -114,10 +122,10 @@ function Chip({ label, onClick }: { label: string; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 text-xs tracking-[0.2em] border border-[#e8c070]/60 text-[#e8c070] rounded-full hover:bg-[#e8c070]/15 transition-all"
+      className="flex items-center gap-2 px-4 py-2 text-xs tracking-[0.2em] border border-[#3d5a38]/50 text-[#3d5a38] rounded-full hover:bg-[#3d5a38]/10 transition-all"
     >
       {label}
-      <span className="text-[#b8a888] text-[10px]">▾</span>
+      <span className="text-[#8a8276] text-[10px]">▾</span>
     </button>
   );
 }
@@ -167,28 +175,30 @@ export default function ReviewPage() {
   };
 
   const inputCls =
-    "w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] aria-invalid:border-red-400 transition-colors duration-300";
+    "w-full bg-transparent border-b border-[#c4bbb0] py-3 text-sm text-[#1e1a14] placeholder-[#8a8276] focus:outline-none focus:border-[#3d5a38] aria-invalid:border-red-400 transition-colors duration-300";
 
   const selectedMbti = useWatch({ control: form.control, name: "mbti" });
-  const selectedConc = useWatch({ control: form.control, name: "concentration" });
+  const selectedConc = useWatch({
+    control: form.control,
+    name: "concentration",
+  });
 
   return (
-    <div className="relative min-h-screen bg-[#1c1710] text-[#fff8ee] flex flex-col">
-
+    <div className="relative min-h-screen bg-[#f5f0e8] text-[#1e1a14] flex flex-col">
       {/* 배경 글로우 */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[#e8c070]/12 blur-[100px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[#3d5a38]/8 blur-[100px]" />
       </div>
 
       {/* 헤더 */}
-      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 border-b border-white/10">
+      <header className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 border-b border-[#1e1a14]/10">
         <Link
           href="/"
-          className="text-xs tracking-[0.35em] text-[#e8c070] uppercase hover:text-[#f5d480] transition-colors"
+          className="text-xs tracking-[0.35em] text-[#3d5a38] uppercase hover:text-[#4e7048] transition-colors"
         >
           ← Yeoun
         </Link>
-        <span className="text-[10px] tracking-[0.4em] text-[#887060] uppercase">
+        <span className="text-[10px] tracking-[0.4em] text-[#8a8276] uppercase">
           Review
         </span>
       </header>
@@ -196,20 +206,19 @@ export default function ReviewPage() {
       {/* 폼 영역 */}
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg">
-
           {/* 타이틀 */}
           <div className="mb-10 text-center">
             <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="w-8 h-px bg-[#e8c070]/50" />
-              <span className="text-[10px] tracking-[0.45em] text-[#e8c070]/75 uppercase">
+              <div className="w-8 h-px bg-[#3d5a38]/40" />
+              <span className="text-[12px] tracking-[0.45em] text-[#6b6459] uppercase">
                 Niche Perfume Review
               </span>
-              <div className="w-8 h-px bg-[#e8c070]/50" />
+              <div className="w-8 h-px bg-[#3d5a38]/40" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extralight tracking-[0.15em] text-[#fff8ee]">
+            <h1 className="text-2xl sm:text-3xl font-extralight tracking-[0.15em] text-[#1e1a14]">
               리뷰 작성
             </h1>
-            <p className="mt-2 text-xs text-[#887060] tracking-widest">
+            <p className="mt-2 text-xs text-[#8a8276] tracking-widest">
               당신의 향기 경험을 남겨주세요
             </p>
           </div>
@@ -223,15 +232,15 @@ export default function ReviewPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center py-16 flex flex-col items-center gap-6"
               >
-                <div className="w-14 h-14 rounded-full border border-[#e8c070]/60 flex items-center justify-center text-[#e8c070] text-2xl">
+                <div className="w-14 h-14 rounded-full border border-[#3d5a38]/60 flex items-center justify-center text-[#3d5a38] text-2xl">
                   ✓
                 </div>
-                <p className="text-[#b8a888] tracking-widest text-sm">
+                <p className="text-[#6b6459] tracking-widest text-sm">
                   리뷰가 등록되었습니다
                 </p>
                 <Link
                   href="/"
-                  className="text-xs tracking-[0.3em] uppercase text-[#e8c070] border border-[#e8c070]/40 px-6 py-2 hover:bg-[#e8c070]/15 transition-colors"
+                  className="text-xs tracking-[0.3em] uppercase text-[#3d5a38] border border-[#3d5a38]/40 px-6 py-2 hover:bg-[#3d5a38]/10 transition-colors"
                 >
                   메인으로
                 </Link>
@@ -281,7 +290,9 @@ export default function ReviewPage() {
                               className={inputCls}
                               {...field}
                               onChange={(e) => {
-                                const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                                const v = e.target.value
+                                  .replace(/\D/g, "")
+                                  .slice(0, 2);
                                 field.onChange(v);
                               }}
                             />
@@ -313,7 +324,7 @@ export default function ReviewPage() {
                                 setMbtiOpen(true);
                                 field.onBlur();
                               }}
-                              className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
+                              className="text-xs tracking-[0.2em] text-[#8a8276] border-b border-[#c4bbb0] pb-3 w-full text-left hover:text-[#6b6459] transition-colors"
                             >
                               MBTI 유형을 선택해주세요
                             </button>
@@ -348,7 +359,7 @@ export default function ReviewPage() {
                                 setConcOpen(true);
                                 field.onBlur();
                               }}
-                              className="text-xs tracking-[0.2em] text-[#887060] border-b border-[#584840] pb-3 w-full text-left hover:text-[#b8a888] transition-colors"
+                              className="text-xs tracking-[0.2em] text-[#8a8276] border-b border-[#c4bbb0] pb-3 w-full text-left hover:text-[#6b6459] transition-colors"
                             >
                               부향률을 선택해주세요
                             </button>
@@ -369,13 +380,13 @@ export default function ReviewPage() {
                             <textarea
                               placeholder="향기에 대한 솔직한 경험을 적어주세요 (최소 10자)"
                               rows={4}
-                              className="w-full bg-transparent border-b border-[#584840] py-3 text-sm text-[#fff8ee] placeholder-[#887060] focus:outline-none focus:border-[#e8c070] aria-invalid:border-red-400 transition-colors duration-300 resize-none"
+                              className="w-full bg-transparent border-b border-[#c4bbb0] py-3 text-sm text-[#1e1a14] placeholder-[#8a8276] focus:outline-none focus:border-[#3d5a38] aria-invalid:border-red-400 transition-colors duration-300 resize-none"
                               {...field}
                             />
                           </FormControl>
                           <div className="flex items-center justify-between">
                             <FormMessage />
-                            <span className="text-[11px] text-[#887060] ml-auto">
+                            <span className="text-[11px] text-[#8a8276] ml-auto">
                               {field.value.length} / 500
                             </span>
                           </div>
@@ -384,7 +395,10 @@ export default function ReviewPage() {
                     />
 
                     {submitError && (
-                      <p className="text-sm text-red-400/90 text-center" role="alert">
+                      <p
+                        className="text-sm text-red-400/90 text-center"
+                        role="alert"
+                      >
                         {submitError}
                       </p>
                     )}
@@ -393,7 +407,7 @@ export default function ReviewPage() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="mt-2 w-full py-4 text-xs tracking-[0.4em] uppercase bg-[#e8c070] text-[#1c1710] font-medium hover:bg-[#f5d480] transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="mt-2 w-full py-4 text-xs tracking-[0.4em] uppercase bg-[#3d5a38] text-[#f5f0e8] font-medium hover:bg-[#4e7048] transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {submitting ? "등록 중…" : "리뷰 등록"}
                     </button>
@@ -417,7 +431,7 @@ export default function ReviewPage() {
               key={type}
               as="button"
               type="button"
-              color={selectedMbti === type ? "#e8c070" : "#8a7560"}
+              color={selectedMbti === type ? "#3d5a38" : "#9a9488"}
               speed={selectedMbti === type ? "2.5s" : "6s"}
               className="w-full"
               onClick={() => {
@@ -428,8 +442,8 @@ export default function ReviewPage() {
               <span
                 className={`py-2 px-1 text-xs tracking-widest font-light transition-colors ${
                   selectedMbti === type
-                    ? "text-[#e8c070]"
-                    : "text-[#b8a888] hover:text-[#fff8ee]"
+                    ? "text-[#3d5a38]"
+                    : "text-[#6b6459] hover:text-[#1e1a14]"
                 }`}
               >
                 {type}
@@ -451,23 +465,27 @@ export default function ReviewPage() {
               key={item.key}
               as="button"
               type="button"
-              color={selectedConc === item.key ? "#e8c070" : "#8a7560"}
+              color={selectedConc === item.key ? "#3d5a38" : "#9a9488"}
               speed={selectedConc === item.key ? "2.5s" : "5s"}
               className="w-full"
               onClick={() => {
-                form.setValue("concentration", item.key, { shouldValidate: true });
+                form.setValue("concentration", item.key, {
+                  shouldValidate: true,
+                });
                 setConcOpen(false);
               }}
             >
               <span className="flex flex-col items-center py-4 px-2 gap-1">
                 <span
                   className={`text-sm tracking-[0.2em] font-light transition-colors ${
-                    selectedConc === item.key ? "text-[#e8c070]" : "text-[#d4c4aa]"
+                    selectedConc === item.key
+                      ? "text-[#3d5a38]"
+                      : "text-[#6b6459]"
                   }`}
                 >
                   {item.label}
                 </span>
-                <span className="text-[10px] text-[#8a7560] tracking-wide text-center leading-4">
+                <span className="text-[10px] text-[#8a8276] tracking-wide text-center leading-4">
                   {item.sub}
                 </span>
               </span>
@@ -475,7 +493,6 @@ export default function ReviewPage() {
           ))}
         </div>
       </Modal>
-
     </div>
   );
 }

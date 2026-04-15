@@ -111,9 +111,9 @@ Deno.serve(async (req: Request) => {
   const lines = [
     "<b>새 리뷰 등록</b>",
     "",
-    `<b>이름 : </b> ${escapeHtml(String(row.name))}`,
-    `<b>나이 : </b> ${row.age ?? "-"}`,
-    `<b>MBTI : </b> ${escapeHtml(String(row.mbti ?? ""))}`,
+    `<b>이름 :</b> ${escapeHtml(String(row.name))}`,
+    `<b>나이 :</b> ${row.age ?? "-"}`,
+    `<b>MBTI :</b> ${escapeHtml(String(row.mbti ?? ""))}`,
     `<b>부향률 :</b> ${escapeHtml(String(row.concentration ?? ""))}`,
     `<b>리뷰 :</b>`,
     escapeHtml(String(row.review ?? "")),

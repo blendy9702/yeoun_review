@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
 
 type PlasmaQuality = "auto" | "high" | "low";
@@ -112,7 +112,8 @@ export const Plasma: React.FC<PlasmaProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mousePos = useRef({ x: 0, y: 0 });
 
-  useEffect(() => {
+  // useLayoutEffect: 클라이언트 전환 직후 레이아웃 직전에 캔버스 크기 잡기 (뒤로가기 시 빈 화면)
+  useLayoutEffect(() => {
     if (!containerRef.current) return;
 
     const shortSide =
@@ -158,17 +159,17 @@ export const Plasma: React.FC<PlasmaProps> = ({
       vertex,
       fragment,
       uniforms: {
-        iTime:             { value: 0 },
-        iResolution:       { value: new Float32Array([1, 1]) },
-        uCustomColor:      { value: new Float32Array(customColorRgb) },
-        uUseCustomColor:   { value: useCustomColor },
-        uSpeed:            { value: speed * 0.4 },
-        uDirection:        { value: directionMultiplier },
-        uScale:            { value: scale },
-        uOpacity:          { value: opacity },
-        uMouse:            { value: new Float32Array([0, 0]) },
+        iTime: { value: 0 },
+        iResolution: { value: new Float32Array([1, 1]) },
+        uCustomColor: { value: new Float32Array(customColorRgb) },
+        uUseCustomColor: { value: useCustomColor },
+        uSpeed: { value: speed * 0.4 },
+        uDirection: { value: directionMultiplier },
+        uScale: { value: scale },
+        uOpacity: { value: opacity },
+        uMouse: { value: new Float32Array([0, 0]) },
         uMouseInteractive: { value: useMouse ? 1.0 : 0.0 },
-        uLoopMax:          { value: loopMax },
+        uLoopMax: { value: loopMax },
       },
     });
 
@@ -189,9 +190,11 @@ export const Plasma: React.FC<PlasmaProps> = ({
     }
 
     const setSize = () => {
-      const rect = containerRef.current!.getBoundingClientRect();
-      const width  = Math.max(1, Math.floor(rect.width));
-      const height = Math.max(1, Math.floor(rect.height));
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      // 뒤로가기 등으로 레이아웃이 아직 그려지지 않았을 때 fallback
+      const width = Math.max(1, Math.floor(rect.width || window.innerWidth));
+      const height = Math.max(1, Math.floor(rect.height || window.innerHeight));
       renderer.setSize(width, height);
       const res = program.uniforms.iResolution.value as Float32Array;
       res[0] = gl.drawingBufferWidth;
@@ -200,24 +203,43 @@ export const Plasma: React.FC<PlasmaProps> = ({
 
     const ro = new ResizeObserver(setSize);
     ro.observe(containerRef.current);
+
+    const onWinResize = () => setSize();
+    window.addEventListener("resize", onWinResize);
+
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setSize();
+      setTimeout(setSize, 0);
+    };
+    window.addEventListener("pageshow", onPageShow);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") setSize();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    // 초기·SPA 복귀 후 레이아웃이 늦게 잡히는 경우 대비
     setSize();
+    const timeout0 = setTimeout(setSize, 0);
+    const timeout50 = setTimeout(setSize, 50);
+    const timeout200 = setTimeout(setSize, 200);
+    const raf1 = requestAnimationFrame(() => {
+      setSize();
+      requestAnimationFrame(setSize);
+    });
 
     let raf = 0;
-    const t0 = performance.now();
+    const timeStart = performance.now();
     let lastRender = 0;
 
     const loop = (t: number) => {
-      if (
-        minFrameMs > 0 &&
-        lastRender > 0 &&
-        t - lastRender < minFrameMs
-      ) {
+      if (minFrameMs > 0 && lastRender > 0 && t - lastRender < minFrameMs) {
         raf = requestAnimationFrame(loop);
         return;
       }
       lastRender = t;
 
-      const timeValue = (t - t0) * 0.001;
+      const timeValue = (t - timeStart) * 0.001;
 
       if (direction === "pingpong") {
         const pingpongDuration = 10;
@@ -244,7 +266,14 @@ export const Plasma: React.FC<PlasmaProps> = ({
     raf = requestAnimationFrame(loop);
 
     return () => {
+      clearTimeout(timeout0);
+      clearTimeout(timeout50);
+      clearTimeout(timeout200);
+      cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onWinResize);
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
       if (useMouse && containerRef.current) {
         containerRef.current.removeEventListener("mousemove", handleMouseMove);
