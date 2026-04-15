@@ -1,0 +1,6 @@
+# https://supabase.com/docs/guides/cli/config
+# 로컬 개발: supabase start 후 사용
+
+[functions.yeoun_review_bot]
+# DB Webhook은 JWT 없이 호출되므로, WEBHOOK_SECRET 헤더로 검증합니다.
+verify_jwt = false
