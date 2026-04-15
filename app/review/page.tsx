@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -126,6 +127,8 @@ export default function ReviewPage() {
   const [mbtiOpen, setMbtiOpen] = useState(false);
   const [concOpen, setConcOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -139,9 +142,28 @@ export default function ReviewPage() {
     mode: "onTouched",
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
-    setSubmitted(true);
+  const onSubmit = async (data: FormValues) => {
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.from("reviews").insert({
+        name: data.name.trim(),
+        age: Number.parseInt(data.age, 10),
+        mbti: data.mbti,
+        concentration: data.concentration,
+        review: data.review.trim(),
+      });
+      if (error) {
+        setSubmitError(error.message);
+        return;
+      }
+      setSubmitted(true);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "저장에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputCls =
@@ -361,12 +383,19 @@ export default function ReviewPage() {
                       )}
                     />
 
+                    {submitError && (
+                      <p className="text-sm text-red-400/90 text-center" role="alert">
+                        {submitError}
+                      </p>
+                    )}
+
                     {/* 제출 */}
                     <button
                       type="submit"
+                      disabled={submitting}
                       className="mt-2 w-full py-4 text-xs tracking-[0.4em] uppercase bg-[#e8c070] text-[#1c1710] font-medium hover:bg-[#f5d480] transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      리뷰 등록
+                      {submitting ? "등록 중…" : "리뷰 등록"}
                     </button>
                   </form>
                 </Form>

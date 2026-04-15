@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Plasma from "./components/Plasma";
+import ReviewsComingSoonButton from "./components/ReviewsComingSoonButton";
 import RotatingText from "./components/RotatingText";
 
 export default function Home() {
@@ -21,7 +22,7 @@ export default function Home() {
         <span className="text-xs tracking-[0.35em] text-[#e8c070] uppercase font-light">
           Yeoun
         </span>
-        <nav className="hidden md:flex items-center gap-10">
+        {/* <nav className="hidden md:flex items-center gap-10">
           {["Reviews", "Story", "Creative"].map((item) => (
             <a
               key={item}
@@ -31,7 +32,7 @@ export default function Home() {
               {item}
             </a>
           ))}
-        </nav>
+        </nav> */}
         <a
           href="https://yeoun-five.vercel.app/"
           target="_blank"
@@ -87,13 +88,7 @@ export default function Home() {
 
         {/* CTA 버튼 */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
-          <a
-            href="#"
-            rel="noopener noreferrer"
-            className="px-8 py-3 text-xs tracking-[0.3em] uppercase bg-[#e8c070] text-[#1c1710] font-medium hover:bg-[#f5d480] transition-colors duration-300"
-          >
-            REVIEWS
-          </a>
+          <ReviewsComingSoonButton />
           <Link
             href="/review"
             className="px-8 py-3 text-xs tracking-[0.3em] uppercase border border-[#fff8ee]/30 text-[#d4c4aa] hover:text-[#fff8ee] hover:border-[#fff8ee]/60 transition-colors duration-300"
