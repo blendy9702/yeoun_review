@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Plasma from "./components/Plasma";
+import FragranceBackground from "./components/FragranceBackground";
 import ReviewsComingSoonButton from "./components/ReviewsComingSoonButton";
 import RotatingText from "./components/RotatingText";
 
@@ -8,14 +8,7 @@ export default function Home() {
     <div className="relative flex flex-col min-h-screen bg-[#f8efe2] text-[#1e1a14] overflow-hidden">
       {/* fixed: 뒤로가기 시 flex 레이아웃 전에 absolute 자식 높이가 0이 되는 문제 방지 */}
       <div className="fixed inset-0 z-0 h-[100dvh] w-full pointer-events-none">
-        <Plasma
-          color="#f0eae0"
-          speed={0.4}
-          direction="forward"
-          scale={0.8}
-          opacity={0.5}
-          quality="auto"
-        />
+        <FragranceBackground />
       </div>
 
       {/* 상단 네비게이션 */}
